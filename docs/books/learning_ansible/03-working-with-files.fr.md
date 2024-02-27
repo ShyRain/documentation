@@ -1,5 +1,5 @@
 ---
-title: Gestion de fichiers
+title: Gestion de Fichiers
 ---
 
 # Ansible - Gestion de Fichiers
@@ -19,7 +19,7 @@ Dans ce chapitre, vous apprendrez à gérer des fichiers avec Ansible.
 **Connaissances** : :star: :star:     
 **Complexité** : :star:
 
-**Temps de lecture : **23 minutes
+**Temps de lecture :** 23 minutes
 
 ****
 

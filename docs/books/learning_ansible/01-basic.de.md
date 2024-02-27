@@ -39,7 +39,7 @@ Es verwendet das **SSH**-Protokoll, um GNU/Linux-Clients zu konfigurieren oder d
 
 Da Ansible push-basiert ist, wird die Software den Status seiner Zielserver nach jeder seiner Ausführung nicht zwischenspeichern. Im Gegenteil, Ansible wird bei jeder Ausführung eine neue Statusprüfung durchführen. Es wird als zustandslos bezeichnet.
 
-Es wird Ihnen helfen bei folgenden Aufgaben:
+Es wird Ihnen bei folgenden Aufgaben helfen:
 
 * Provisionierung (Bereitstellung einer neuen VM),
 * Verteilung von Applikationen,
@@ -126,7 +126,7 @@ $ python3 --version
 Python 3.6.8
 ```
 
-Beachten Sie, dass Ansible mit einer eigenen Python-Version geliefert wird, die sich von der Systemversion (hier 3.11.2 gegenüber 3.6.8) unterscheidet. Sie müssen dies berücksichtigen, wenn Sie die für Ihre Installation erforderlichen Python-Module per PIP installieren (z. B. `pip3.11 install PyVMomi`).
+Beachten Sie, dass Ansible mit einer eigenen Python-Version geliefert wird, die sich von der Systemversion (hier 3.11.2 gegenüber 3.6.8) unterscheidet. Sie müssen dies berücksichtigen, wenn Sie die für Ihre Installation erforderlichen Python-Module per PIP installieren (z.B., `pip3.11 install PyVMomi`).
 
 ### Installation über python pip
 
@@ -270,7 +270,7 @@ Wechseln Sie zur Default-Inventardatei, die sich unter `/etc/ansible/hosts` befi
 ## db-[99:101]-node.example.com
 ```
 
-Wie Sie feststellen können, verwendet die als Beispiel bereitgestellte Datei das INI-Format, das bei Systemadministratoren gut bekannt ist. Beachten Sie, dass Sie ein anderes Dateiformat wählen können (z. B. Yaml), aber für erste Tests passt das INI-Format gut in den nächsten Beispiele.
+Wie Sie feststellen können, verwendet die als Beispiel bereitgestellte Datei das INI-Format, das bei Systemadministratoren gut bekannt ist. Beachten Sie, dass Sie ein anderes Dateiformat wählen können (z.B., Yaml), aber für erste Tests passt das INI-Format gut in den nächsten Beispielen.
 
 Das Inventar kann automatisch in der Produktion generiert werden, insbesondere wenn Sie über eine Virtualisierungsumgebung wie VMware VSphere oder eine Cloud-Umgebung (AWS, OpenStack oder andere) verfügen.
 
@@ -360,7 +360,7 @@ ansible rocky8 -i ./local-inventory -m command -a 'date'
 
     Wie in diesem Beispiel ist es manchmal einfacher, die Deklaration verwalteter Geräte in verschiedene Dateien zu unterteilen (z. B. beim Cloud-Projekt) und Ansible den Pfad zu diesen Dateien bereitzustellen, als eine lange Inventardatei zu pflegen.
 
-| Option                   | Informationen                                                                                                |
+| Option                   | Beschreibung                                                                                                 |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------ |
 | `-a 'arguments'`         | Die Argumente, die an das Modul übergeben werden.                                                            |
 | `-b -K`                  | Fordert ein Passwort an und führt das Kommando mit höheren Rechten aus.                                      |
@@ -449,7 +449,9 @@ SSH password:
 
 !!! tip "Hinweis"
 
-    If you get this error `"msg": "to use the 'ssh' connection type with passwords, you must install the sshpass program"`, you can just install `sshpass` on the management station:
+    Wenn Sie folgende Fehlermeldung erhalten: 
+    `"msg": "to use the 'ssh' connection type with passwords, you must install the sshpass program"`, 
+    installieren Sie einfach `sshpass` auf der Verwaltungstation:
 
     ```
     $ sudo dnf install sshpass

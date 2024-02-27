@@ -18,12 +18,13 @@ tags:
 
 The following are minimum requirements for using this procedure:
 
-* A public IP address, whether directly on the server or with port forwarding
+* A public IPv4 address, whether directly on the server or with port forwarding
 * A system that is able to run 24/7, to be useful for the Tor network
 * The ability to run commands as the root user or use `sudo` to elevate privileges
 * Familiarity with a command-line editor. The author is using `vi` or `vim` here, but substitute in your favorite editor
 * Comfort with changing SELinux and firewall settings
 * An unmetered connection, or a connection with a high bandwidth limit
+* Optional: A public IPv6 address for dual-stack connectivity
 
 ## Installing Tor
 
@@ -134,19 +135,19 @@ Within a few hours, your relay will be listed on [Tor Relay Status](https://metr
 
 ## Relay considerations
 
-You can also extend the configuration to make your Tor relay an exit or bridge relay.
+You can also extend the configuration to make your Tor relay an exit or bridge relay. You can also set up a maximum of 8 relays per public IP address. The Tor systemd unit file in EPEL is not designed for more than one instance, but the unit file can be copied and modified to accommodate a multi-relay setup.
 
 Exit relays are the last hop of a Tor circuit connecting directly to websites. Bridge relays are unlisted relays that help users with internet censorship connect to Tor.
 
-Options for the `torrc` file are in [the man page](https://2019.www.torproject.org/docs/tor-manual.html.en). Here, we will describe a basic configuration for an exit and bridge relay.
+Options for the `torrc` file are in [the man page](https://2019.www.torproject.org/docs/tor-manual.html.en). Here, we describe a basic configuration for an exit and bridge relay.
 
 ### Running an exit relay
 
 !!! warning
 
-    If you plan to run an exit relay, make sure your ISP or hosting company is comfortable with it. Abuse complaints from exit relays are very common, as it is the last node of a Tor circuit which connects directly to websites on behalf of Tor users. Many hosting companies disallow Tor exit relays for this reason.
+    If you plan to run an exit relay, make sure your ISP or hosting company is comfortable with it. Abuse complaints from exit relays are widespread, as it is the last node of a Tor circuit that connects directly to websites on behalf of Tor users. Many hosting companies disallow Tor exit relays for this reason.
 
-    If you are unsure your ISP allows Tor exit relays, look at the terms of service or ask your ISP. If your ISP says no, look at another ISP or hosting company, or consider a middle or bridge relay instead.
+    If you are unsure your ISP allows Tor exit relays, look at the terms of service or ask your ISP. If your ISP says no, look at another ISP or hosting company or consider a middle or bridge relay instead.
 
 If you want to run an exit relay, you'll need to append the following to your `torrc`:
 
@@ -170,7 +171,7 @@ ExitPolicy reject *:6881-6999
 ExitPolicy accept *:*
 ```
 
-This exit policy blocks only a small subset of TCP ports, which allows abuse from BitTorrent and SSH which many ISPs are uncomfortable with.
+This exit policy blocks only a tiny subset of TCP ports, which allows abuse from BitTorrent and SSH, with which many ISPs are uncomfortable.
 
 If you want to use a [reduced exit policy](https://gitlab.torproject.org/legacy/trac/-/wikis/doc/ReducedExitPolicy), you can set it in the `torrc`:
 
@@ -189,8 +190,8 @@ ExitPolicy reject *:*
 
 These values imply that:
 
-* We are allowing exit traffic to TCP ports 53 (DNS), 80 (HTTP), and 443 (HTTPS) with our "ExitPolicy accept" lines
-* We are disallowing exit traffic to any other TCP port with our wildcard "ExitPolicy reject" lines.
+* We allow exit traffic to TCP ports 53 (DNS), 80 (HTTP), and 443 (HTTPS) with our "ExitPolicy accept" lines
+* We disallow exit traffic to any other TCP port with our wildcard "ExitPolicy reject" lines
 
 If you want an unrestrictive exit policy, by only blocking SMTP traffic, this can be set as:
 
@@ -203,8 +204,8 @@ ExitPolicy accpet *:*
 
 These values imply that
 
-* We are disallowing exit traffic to the common SMTP TCP ports of 25, 465, and 587 in our "ExitPolicy reject" lines.
-* We are allow exit traffic to all other TCP ports in our wildcard "ExitPolicy accept" line.
+* We disallow exit traffic to the standard SMTP TCP ports of 25, 465, and 587 in our "ExitPolicy reject" lines
+* We allow exit traffic to all other TCP ports in our wildcard "ExitPolicy accept" line
 
 We can also allow or block a range of ports as follows:
 
@@ -215,8 +216,8 @@ ExitPolicy reject *:993-995
 
 These values imply that:
 
-* We are allowing exit traffic to TCP ports 80-81.
-* We are disallowing exit traffic to TCP ports 993-995, which are used for the SSL-secured variants of IMAP, IRC, and POP3.
+* We allow exit traffic to TCP ports 80-81
+* We disallow exit traffic to TCP ports 993-995, which are used for the SSL-secured IMAP, IRC, and POP3 variants
 
 You can also allow exit traffic to IPv6 addresses, assuming your server has dual-stack connectivity:
 
@@ -226,13 +227,13 @@ IPv6Exit 1
 
 ### Running an obfs4 bridge
 
-In many parts of the world, including China, Iran, Russia, and Turkmenistan, direct connections to Tor are blocked. In those countries, unlisted bridge relays are used by Tor clients.
+Direct connections to Tor are blocked in many parts of the world, including China, Iran, Russia, and Turkmenistan. In those countries, unlisted bridge relays are used by Tor clients.
 
 Tor operates using a system of [pluggable transports](https://support.torproject.org/glossary/pluggable-transports/), which allow Tor traffic to be masked as other protocols such as unidentifiable dummy traffic (obfs4), WebRTC (snowflake), or HTTPS connections to Microsoft services (meek).
 
 Due to its versatility, obfs4 is the most popular pluggable transport.
 
-To set up an obfs4 bridge, as obfs4 is not in the EPEL repos, we'll need to compile it from scratch. Lets first install the necessary packages:
+To set up an obfs4 bridge, as obfs4 is not in the EPEL repos, we will need to compile it from scratch. Let us first install the necessary packages:
 
 ```bash
 dnf install git golang policycoreutils-python-utils
@@ -267,17 +268,83 @@ These values imply that:
 
 * We are running an obfs4 pluggable transport located at `/usr/local/bin/obfs4proxy` on our `ServerTransportPlugin` line
 * `ServerTransportListenAddr` makes our pluggable transport listen on port 12345
-* Our `ExtORPort` line will listen on an randomly-chosen port for connections between Tor and our pluggable transport. Normally, this line shouldn't be changed
+* Our `ExtORPort` line will listen on an randomly chosen port for connections between Tor and our pluggable transport. Normally, this line should not be changed
 
 If you want to listen on another TCP port, change "12345" with your desired TCP port.
 
-We will also have to allow our chosen TCP port "12345" (or the port you chose) in SELinux and `firewalld`:
+We will also allow our chosen TCP port "12345" (or the port you chose) in SELinux and `firewalld`:
 
 ```bash
 semanage port -a -t tor_port_t -p tcp 12345
 firewall-cmd --zone=public --add-port=12345/tcp
 firewall-cmd --runtime-to-permanent
 ```
+
+## Running multiple relays
+
+As mentioned earlier, you can set up to 8 Tor relays per public IP address. For instance, if we have 5 public IP addresses, we can set up a maximum of 40 relays on our server.
+
+However, we need a custom systemd unit file for each relay we run.
+
+Let us now add a secondary systemd unit file at `/usr/lib/systemd/system/torX`:
+
+```bash
+[Unit]
+Description=Anonymizing overlay network for TCP
+After=syslog.target network.target nss-lookup.target
+PartOf=tor-master.service
+ReloadPropagatedFrom=tor-master.service
+
+[Service]
+Type=notify
+NotifyAccess=all
+ExecStartPre=/usr/bin/tor --runasdaemon 0 -f /etc/tor/torrcX --DataDirectory /var/lib/tor/X --DataDirectoryGroupReadable 1 --User toranon --verify-config
+ExecStart=/usr/bin/tor --runasdaemon 0 -f /etc/tor/torrcX --DataDirectory /var/lib/tor/X --DataDirectoryGroupReadable 1 --User toranon
+ExecReload=/bin/kill -HUP ${MAINPID}
+KillSignal=SIGINT
+TimeoutSec=30
+Restart=on-failure
+RestartSec=1
+WatchdogSec=1m
+LimitNOFILE=32768
+
+# Hardening
+PrivateTmp=yes
+DeviceAllow=/dev/null rw
+DeviceAllow=/dev/urandom r
+ProtectHome=yes
+ProtectSystem=full
+ReadOnlyDirectories=/run
+ReadOnlyDirectories=/var
+ReadWriteDirectories=/run/tor
+ReadWriteDirectories=/var/lib/tor
+ReadWriteDirectories=/var/log/tor
+CapabilityBoundingSet=CAP_SETUID CAP_SETGID CAP_NET_BIND_SERVICE CAP_DAC_READ_SEARCH
+PermissionsStartOnly=yes
+
+[Install]
+WantedBy = multi-user.target
+```
+
+Replace the `X` suffix after `tor`/`torrc` with your desired name. The author likes to number it for simplicity, but it can be anything.
+
+Subsequently, we will add the instance's `torrc` file in `/etc/tor/torrcX`. Ensure each instance has a separate port and/or IP address.
+
+We will also allow our chosen TCP port "12345" (or the port in `torrcX`) in SELinux and `firewalld`:
+
+```bash
+semanage port -a -t tor_port_t -p tcp 12345
+firewall-cmd --zone=public --add-port=12345/tcp
+firewall-cmd --runtime-to-permanent
+```
+
+After that, enable the `torX` systemd unit:
+
+```bash
+systemctl enable --now torX
+```
+
+Repeat these steps for each relay you want to run.
 
 ## Conclusion
 
